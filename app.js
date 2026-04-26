@@ -91,24 +91,35 @@ function isReadOnly() {
     return appState.currentRank === 'Administrateur (Lecture Seule)';
 }
 
+function canAccessSettings() {
+    const settingsRanks = ['Directeur Général', 'Directeur Adjoint'];
+    return settingsRanks.includes(appState.currentRank) || appState.currentDoctorId === 'admin';
+}
+
 function applyPermissions() {
     const readOnly = isReadOnly();
-    
+
+    // Hide write actions for read-only users
     const hideIfReadonly = [
         'btn-new-patient',
         'btn-new-recrutement',
         'btn-new-ppa',
         'btn-add-intervention',
-        'btn-add-visite',
-        'settings-btn'
+        'btn-add-visite'
     ];
-    
+
     hideIfReadonly.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
             el.style.display = readOnly ? 'none' : '';
         }
     });
+
+    // Settings button: only Directeur Général & Directeur Adjoint
+    const settingsBtn = document.getElementById('settings-btn');
+    if (settingsBtn) {
+        settingsBtn.style.display = canAccessSettings() ? '' : 'none';
+    }
 }
 
 function generateId() {
