@@ -825,6 +825,48 @@
         </div>
     </div>
 
+    <!-- Modal: Change Password -->
+    <div id="modal-change-password" class="modal-overlay hidden">
+        <div class="modal glass-panel" style="max-width: 420px;">
+            <div class="modal-header">
+                <h3>Changer le Mot de Passe</h3>
+                <button class="btn-close modal-close">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div>
+                <p class="subtitle" id="change-pwd-subtitle" style="margin-bottom: 18px;">Entrez le nouveau mot de passe.</p>
+                <input type="hidden" id="change-pwd-doctor-id">
+                <div class="input-group" style="position: relative;">
+                    <label>Nouveau mot de passe</label>
+                    <div style="position: relative;">
+                        <input type="password" id="change-pwd-new" placeholder="Nouveau mot de passe" style="width: 100%; padding-right: 44px; box-sizing: border-box;">
+                        <button type="button" onclick="toggleInputPassword('change-pwd-new')" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color: var(--text-muted); padding:4px;" title="Afficher/masquer">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="input-group" style="position: relative;">
+                    <label>Confirmer le mot de passe</label>
+                    <div style="position: relative;">
+                        <input type="password" id="change-pwd-confirm" placeholder="Répéter le mot de passe" style="width: 100%; padding-right: 44px; box-sizing: border-box;">
+                        <button type="button" onclick="toggleInputPassword('change-pwd-confirm')" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color: var(--text-muted); padding:4px;" title="Afficher/masquer">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <p id="change-pwd-error" style="color: var(--status-elevee); font-size: 0.85em; margin-top: -8px; margin-bottom: 12px; display: none;">Les mots de passe ne correspondent pas.</p>
+                <div class="modal-actions">
+                    <button type="button" class="btn-ghost modal-close">Annuler</button>
+                    <button type="button" class="btn-primary" id="btn-confirm-change-pwd">Confirmer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="print-container" class="print-only"></div>
 
     <script src="app.js"></script>

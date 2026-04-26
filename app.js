@@ -883,18 +883,62 @@ window.togglePasswordVisibility = function(targetId, btnId, plainText) {
     input.type = input.type === 'password' ? 'text' : 'password';
 };
 
-// Change the password of an existing doctor
+// Toggle visibility of a password input field
+window.toggleInputPassword = function(inputId) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    input.type = input.type === 'password' ? 'text' : 'password';
+};
+
+// Open the change-password modal for a given doctor
 window.changePassword = function(docId) {
     const doc = appState.allowedDoctors.find(d => d.id === docId);
     if (!doc) return;
-    const newPwd = prompt(`Nouveau mot de passe pour ${doc.name} (@${doc.id}) :`);
-    if (newPwd !== null && newPwd.trim() !== '') {
-        doc.password = newPwd.trim();
-        saveData();
-        renderAllowedDoctors();
-        showToast(`Mot de passe mis à jour pour ${doc.name}`);
-    }
+
+    document.getElementById('change-pwd-doctor-id').value = docId;
+    document.getElementById('change-pwd-subtitle').textContent = `Changer le mot de passe de ${doc.name} (@${doc.id})`;
+    document.getElementById('change-pwd-new').value = '';
+    document.getElementById('change-pwd-confirm').value = '';
+    document.getElementById('change-pwd-error').style.display = 'none';
+    // Reset input types
+    document.getElementById('change-pwd-new').type = 'password';
+    document.getElementById('change-pwd-confirm').type = 'password';
+
+    document.getElementById('modal-change-password').classList.add('active');
 };
+
+// Wire the confirm button for the change-password modal
+(function setupChangePwdModal() {
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('btn-confirm-change-pwd').addEventListener('click', () => {
+            const docId = document.getElementById('change-pwd-doctor-id').value;
+            const newPwd = document.getElementById('change-pwd-new').value.trim();
+            const confirmPwd = document.getElementById('change-pwd-confirm').value.trim();
+            const errorEl = document.getElementById('change-pwd-error');
+
+            if (!newPwd) {
+                errorEl.textContent = 'Le mot de passe ne peut pas être vide.';
+                errorEl.style.display = 'block';
+                return;
+            }
+            if (newPwd !== confirmPwd) {
+                errorEl.textContent = 'Les mots de passe ne correspondent pas.';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            const doc = appState.allowedDoctors.find(d => d.id === docId);
+            if (doc) {
+                doc.password = newPwd;
+                saveData();
+                renderAllowedDoctors();
+                showToast(`Mot de passe mis à jour pour ${doc.name}`);
+            }
+
+            document.getElementById('modal-change-password').classList.remove('active');
+        });
+    });
+})();
 
 window.removeDoctor = function(id) {
     if (id.toLowerCase() === 'mancini13') {
