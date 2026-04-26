@@ -1,22 +1,33 @@
+// Configuration Supabase
+const SUPABASE_URL = 'https://cfwztjsjiqrqxxqyskrz.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmd3p0anNqaXFycXh4cXlza3J6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMzM4MzcsImV4cCI6MjA5MjgwOTgzN30.ajcKKcOjVpsNuAaC2Mook0xHj_LaDAbOj-9zlkuk4H4';
+const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 let appState = {
     currentDoctorId: null,
     currentDoctorName: null,
     currentRank: 'Médecin',
     currentView: 'view-login',
     activePatientId: null,
-    patients: [], // Array of patient objects
-    allowedDoctors: [], // Array of allowed IDs {id, rank}
-    recrutements: [], // Array of recruitment evaluations
-    ppa: [] // Array of PPA evaluations
+    patients: [],
+    allowedDoctors: [],
+    recrutements: [],
+    ppa: []
 };
 
 // Initialization
-document.addEventListener('DOMContentLoaded', () => {
-    loadData();
+document.addEventListener('DOMContentLoaded', async () => {
     setupEventListeners();
+    await loadData();
     
-    // Check if already logged in
-    if (appState.currentDoctorId || appState.currentDoctorName) {
+    // Check session in localStorage (only for the login state)
+    const session = localStorage.getItem('medrp_session');
+    if (session) {
+        const data = JSON.parse(session);
+        appState.currentDoctorId = data.id;
+        appState.currentDoctorName = data.name;
+        appState.currentRank = data.rank;
+        
         document.getElementById('doctor-name-display').innerHTML = `<strong>[${appState.currentRank}]</strong> ${appState.currentDoctorName}`;
         switchView('view-dashboard');
         renderPatients();
@@ -26,59 +37,41 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Load/Save from LocalStorage
-function loadData() {
-    const saved = localStorage.getItem('medrp_data');
-    if (saved) {
-        try {
-            const parsed = JSON.parse(saved);
-            appState.currentDoctorId = parsed.currentDoctorId || parsed.currentDoctor || null;
-            appState.currentDoctorName = parsed.currentDoctorName || parsed.currentDoctor || null;
-            appState.currentRank = parsed.currentRank || 'Médecin';
-            appState.patients = parsed.patients || [];
-            
-            const loadedDoctors = parsed.allowedDoctors || [];
-            appState.allowedDoctors = loadedDoctors.map(doc => {
-                if (typeof doc === 'string') return { id: doc, name: `Dr. ${doc}`, rank: 'Médecin', password: 'password' };
-                if (!doc.name) doc.name = `Dr. ${doc.id}`;
-                if (!doc.password) doc.password = 'password'; // Default password
-                return doc;
-            });
-            appState.recrutements = parsed.recrutements || [];
-            appState.ppa = parsed.ppa || [];
-        } catch (e) {
-            console.error("Failed to parse saved data.");
-        }
-    }
-    
-    // Force Mancini13 as Directeur Général
-    const manciniIndex = appState.allowedDoctors.findIndex(d => d.id.toLowerCase() === 'mancini13');
-    if (manciniIndex !== -1) {
-        appState.allowedDoctors[manciniIndex].rank = 'Directeur Général';
-        if (appState.allowedDoctors[manciniIndex].name === `Dr. Mancini13` || !appState.allowedDoctors[manciniIndex].name) {
-            appState.allowedDoctors[manciniIndex].name = 'Dr. Mancini';
-        }
-    } else {
-        appState.allowedDoctors.push({ id: 'Mancini13', name: 'Dr. Mancini', rank: 'Directeur Général', password: 'admin123' });
-    }
+// Load everything from Supabase
+async function loadData() {
+    try {
+        // Load Doctors
+        const { data: doctors } = await _supabase.from('doctors').select('*');
+        appState.allowedDoctors = doctors || [];
 
-    if (appState.currentDoctorId && appState.currentDoctorId.toLowerCase() === 'mancini13') {
-        appState.currentRank = 'Directeur Général';
-        const updatedMancini = appState.allowedDoctors.find(d => d.id.toLowerCase() === 'mancini13');
-        if(updatedMancini) appState.currentDoctorName = updatedMancini.name;
+        // Load Patients
+        const { data: patients } = await _supabase.from('patients').select('*');
+        appState.patients = patients || [];
+
+        // Load Recrutements
+        const { data: recrutements } = await _supabase.from('recrutements').select('*');
+        appState.recrutements = recrutements || [];
+
+        // Load PPA
+        const { data: ppa } = await _supabase.from('ppa').select('*');
+        appState.ppa = ppa || [];
+
+    } catch (e) {
+        console.error("Erreur lors du chargement des données Supabase:", e);
     }
 }
 
-function saveData() {
-    localStorage.setItem('medrp_data', JSON.stringify({
-        currentDoctorId: appState.currentDoctorId,
-        currentDoctorName: appState.currentDoctorName,
-        currentRank: appState.currentRank,
-        patients: appState.patients,
-        allowedDoctors: appState.allowedDoctors,
-        recrutements: appState.recrutements,
-        ppa: appState.ppa
+// Session save (only for login state)
+function saveSession() {
+    localStorage.setItem('medrp_session', JSON.stringify({
+        id: appState.currentDoctorId,
+        name: appState.currentDoctorName,
+        rank: appState.currentRank
     }));
+}
+
+function clearSession() {
+    localStorage.removeItem('medrp_session');
 }
 
 // Utils
@@ -142,7 +135,7 @@ function showToast(message) {
         <span>${message}</span>
     `;
     container.appendChild(toast);
-    
+
     setTimeout(() => {
         toast.style.opacity = '0';
         toast.style.transform = 'translateX(100%)';
@@ -157,7 +150,7 @@ function switchView(viewId) {
         el.classList.remove('active');
         setTimeout(() => el.classList.add('hidden'), 400); // Wait for transition
     });
-    
+
     // Show target view
     setTimeout(() => {
         document.querySelectorAll('.view').forEach(el => el.classList.add('hidden'));
@@ -208,7 +201,7 @@ function renderPatients(searchQuery = '') {
         const card = document.createElement('div');
         card.className = 'patient-card glass-panel';
         card.onclick = () => openPatient(patient.id);
-        
+
         card.innerHTML = `
             <div class="patient-card-header">
                 <div class="avatar">${getInitials(patient.firstName, patient.lastName)}</div>
@@ -227,7 +220,7 @@ function renderPatients(searchQuery = '') {
     });
 }
 
-function openPatient(id) {
+async function openPatient(id) {
     const patient = appState.patients.find(p => p.id === id);
     if (!patient) return;
 
@@ -251,6 +244,10 @@ function openPatient(id) {
             adminActions.style.display = 'none';
         }
     }
+
+    // Fetch interventions from Supabase
+    const { data: interventions } = await _supabase.from('interventions').select('*').eq('patient_id', id);
+    patient.interventions = interventions || [];
 
     renderInterventions(patient);
     switchView('view-patient');
@@ -285,12 +282,12 @@ function renderInterventions(patient) {
                 <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px; vertical-align:-2px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> ${dateStr} à ${timeStr}</span>
                 <span class="intervention-doctor">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                    ${int.doctor}
+                    ${int.doctor_name || int.doctor}
                 </span>
             </div>
             <h4>${int.title}</h4>
             <div class="intervention-desc">
-                ${int.description.replace(/\n/g, '<br>')}
+                ${(int.description || '').replace(/\n/g, '<br>')}
             </div>
             ${int.prescriptions ? `
                 <div class="intervention-prescriptions">
@@ -311,34 +308,49 @@ function renderInterventions(patient) {
 // Event Listeners
 function setupEventListeners() {
     // Login
-    document.getElementById('login-form').addEventListener('submit', (e) => {
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const name = document.getElementById('doctor-name').value.trim();
         const password = document.getElementById('doctor-password').value.trim();
+        
         if (name && password) {
-            const doctorObj = appState.allowedDoctors.find(d => d.id.toLowerCase() === name.toLowerCase());
-            const isAllowed = (name.toLowerCase() === 'admin' && password === 'admin') || (doctorObj && doctorObj.password === password);
-            
-            if (isAllowed) {
-                appState.currentDoctorId = name;
-                appState.currentDoctorName = doctorObj ? doctorObj.name : 'Administrateur';
-                appState.currentRank = doctorObj ? doctorObj.rank : 'Admin';
-                document.getElementById('doctor-name-display').innerHTML = `<strong>[${appState.currentRank}]</strong> ${appState.currentDoctorName}`;
-                saveData();
-                switchView('view-dashboard');
-                renderPatients();
-                applyPermissions();
-                showToast(`Bienvenue, ${appState.currentDoctorName}`);
+            // Check Admin first
+            if (name.toLowerCase() === 'admin' && password === 'admin') {
+                appState.currentDoctorId = 'admin';
+                appState.currentDoctorName = 'Administrateur';
+                appState.currentRank = 'Directeur Général';
             } else {
-                showToast(`Accès refusé. Identifiant ou mot de passe incorrect.`);
+                // Check Supabase
+                const { data: doctor, error } = await _supabase
+                    .from('doctors')
+                    .select('*')
+                    .eq('id', name)
+                    .single();
+
+                if (doctor && doctor.password === password) {
+                    appState.currentDoctorId = doctor.id;
+                    appState.currentDoctorName = doctor.name;
+                    appState.currentRank = doctor.rank;
+                } else {
+                    showToast(`Accès refusé. Identifiant ou mot de passe incorrect.`);
+                    return;
+                }
             }
+
+            document.getElementById('doctor-name-display').innerHTML = `<strong>[${appState.currentRank}]</strong> ${appState.currentDoctorName}`;
+            saveSession();
+            switchView('view-dashboard');
+            renderPatients();
+            applyPermissions();
+            showToast(`Bienvenue, ${appState.currentDoctorName}`);
         }
     });
 
     // Logout
     document.getElementById('logout-btn').addEventListener('click', () => {
-        appState.currentDoctor = null;
-        saveData();
+        appState.currentDoctorId = null;
+        appState.currentDoctorName = null;
+        clearSession();
         switchView('view-login');
         document.getElementById('doctor-name').value = '';
         document.getElementById('doctor-password').value = '';
@@ -395,7 +407,7 @@ function setupEventListeners() {
     document.getElementById('btn-edit-patient').addEventListener('click', () => {
         const patient = appState.patients.find(p => p.id === appState.activePatientId);
         if (!patient) return;
-        
+
         appState.editingPatientId = patient.id;
         const form = document.getElementById('form-add-patient');
         form.elements['firstName'].value = patient.firstName;
@@ -405,15 +417,19 @@ function setupEventListeners() {
         form.elements['bloodType'].value = patient.bloodType;
         form.elements['allergies'].value = patient.allergies;
         form.elements['history'].value = patient.history;
-        
+
         document.getElementById('modal-add-patient').querySelector('h3').textContent = 'Modifier Dossier Patient';
         document.getElementById('modal-add-patient').classList.add('active');
     });
 
-    document.getElementById('btn-delete-patient').addEventListener('click', () => {
+    document.getElementById('btn-delete-patient').addEventListener('click', async () => {
         if (confirm('Êtes-vous sûr de vouloir supprimer définitivement ce dossier patient ?')) {
+            const { error } = await _supabase.from('patients').delete().eq('id', appState.activePatientId);
+            if (error) {
+                showToast("Erreur lors de la suppression");
+                return;
+            }
             appState.patients = appState.patients.filter(p => p.id !== appState.activePatientId);
-            saveData();
             switchView('view-dashboard');
             renderPatients(document.getElementById('search-patient').value);
             showToast('Dossier patient supprimé');
@@ -438,42 +454,43 @@ function setupEventListeners() {
         document.getElementById('modal-add-patient').classList.add('active');
     });
 
-    document.getElementById('form-add-patient').addEventListener('submit', (e) => {
+    document.getElementById('form-add-patient').addEventListener('submit', async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
         
+        const patientData = {
+            firstName: formData.get('firstName'),
+            lastName: formData.get('lastName'),
+            age: parseInt(formData.get('age')),
+            gender: formData.get('gender'),
+            bloodType: formData.get('bloodType'),
+            allergies: formData.get('allergies'),
+            history: formData.get('history')
+        };
+
         if (appState.editingPatientId) {
-            const patient = appState.patients.find(p => p.id === appState.editingPatientId);
-            if (patient) {
-                patient.firstName = formData.get('firstName');
-                patient.lastName = formData.get('lastName');
-                patient.age = formData.get('age');
-                patient.gender = formData.get('gender');
-                patient.bloodType = formData.get('bloodType');
-                patient.allergies = formData.get('allergies');
-                patient.history = formData.get('history');
-            }
-            appState.editingPatientId = null;
+            const { error } = await _supabase.from('patients').update(patientData).eq('id', appState.editingPatientId);
+            if (error) { showToast("Erreur de mise à jour"); return; }
+            
+            // Update local state
+            const pIndex = appState.patients.findIndex(p => p.id === appState.editingPatientId);
+            if (pIndex !== -1) appState.patients[pIndex] = { ...appState.patients[pIndex], ...patientData };
+            
             showToast("Dossier patient mis à jour");
-            openPatient(patient.id);
+            openPatient(appState.editingPatientId);
         } else {
             const newPatient = {
                 id: generateId().toUpperCase(),
-                firstName: formData.get('firstName'),
-                lastName: formData.get('lastName'),
-                age: formData.get('age'),
-                gender: formData.get('gender'),
-                bloodType: formData.get('bloodType'),
-                allergies: formData.get('allergies'),
-                history: formData.get('history'),
-                interventions: []
+                ...patientData
             };
 
+            const { error } = await _supabase.from('patients').insert([newPatient]);
+            if (error) { showToast("Erreur de création"); return; }
+            
             appState.patients.push(newPatient);
             showToast("Dossier patient créé avec succès");
         }
         
-        saveData();
         document.getElementById('modal-add-patient').classList.remove('active');
         renderPatients(document.getElementById('search-patient').value);
     });
@@ -483,12 +500,12 @@ function setupEventListeners() {
         document.getElementById('form-add-intervention').reset();
         document.getElementById('intervention-total-price').textContent = '0 $';
         document.getElementById('input-total-price').value = '0';
-        
+
         // Default date to now
         const now = new Date();
         now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-        document.querySelector('input[name="date"]').value = now.toISOString().slice(0,16);
-        
+        document.querySelector('input[name="date"]').value = now.toISOString().slice(0, 16);
+
         // Auto-fill doctor
         document.getElementById('intervention-doctor').value = appState.currentDoctorName;
 
@@ -501,53 +518,56 @@ function setupEventListeners() {
         cb.addEventListener('change', () => {
             let total = 0;
             soinsCheckboxes.forEach(c => {
-                if(c.checked) total += parseInt(c.dataset.price, 10);
+                if (c.checked) total += parseInt(c.dataset.price, 10);
             });
             document.getElementById('intervention-total-price').textContent = total.toLocaleString('en-US') + ' $';
             document.getElementById('input-total-price').value = total;
         });
     });
 
-    document.getElementById('form-add-intervention').addEventListener('submit', (e) => {
+    document.getElementById('form-add-intervention').addEventListener('submit', async (e) => {
         e.preventDefault();
         const patient = appState.patients.find(p => p.id === appState.activePatientId);
         if (!patient) return;
 
         const formData = new FormData(e.target);
-        
         const soins = formData.getAll('soins');
         const notes = formData.get('notes');
         const total = formData.get('totalPrice');
         
         let desc = `Soins facturés : ${soins.length > 0 ? soins.join(', ') : 'Aucun'}`;
-        if(parseInt(total, 10) > 0) desc += `\nTotal facturé : ${total.toLocaleString('en-US')} $`;
+        if(parseInt(total, 10) > 0) desc += `\nTotal facturé : ${total} $`;
         if(notes) desc += `\n\nNotes : ${notes}`;
         
         const newIntervention = {
-            id: generateId(),
+            patient_id: patient.id,
             title: formData.get('title'),
             date: formData.get('date'),
-            doctor: formData.get('doctor'),
+            doctor_name: formData.get('doctor'),
             severity: formData.get('severity'),
             description: desc,
-            prescriptions: formData.get('prescriptions')
+            prescriptions: formData.get('prescriptions'),
+            total_price: parseInt(total)
         };
 
-        patient.interventions.push(newIntervention);
-        saveData();
+        const { error } = await _supabase.from('interventions').insert([newIntervention]);
+        if (error) { showToast("Erreur d'enregistrement"); return; }
         
         document.getElementById('modal-add-intervention').classList.remove('active');
-        renderInterventions(patient);
+        openPatient(patient.id);
         showToast("Intervention enregistrée");
     });
 
     // Moderation Settings
     document.getElementById('settings-btn').addEventListener('click', () => {
         renderAllowedDoctors();
+        if (document.getElementById('export-output')) {
+            document.getElementById('export-output').style.display = 'none';
+        }
         document.getElementById('modal-settings').classList.add('active');
     });
 
-    document.getElementById('form-add-doctor').addEventListener('submit', (e) => {
+    document.getElementById('form-add-doctor').addEventListener('submit', async (e) => {
         e.preventDefault();
         const idInput = document.getElementById('new-doctor-id');
         const nameInput = document.getElementById('new-doctor-name');
@@ -557,9 +577,13 @@ function setupEventListeners() {
         const rpName = nameInput.value.trim();
         const rank = rankInput.value;
         const password = passwordInput.value.trim() || 'password';
+
         if (id && rpName && !appState.allowedDoctors.some(d => d.id.toLowerCase() === id.toLowerCase())) {
-            appState.allowedDoctors.push({ id, name: rpName, rank, password });
-            saveData();
+            const newDoc = { id, name: rpName, rank, password };
+            const { error } = await _supabase.from('doctors').insert([newDoc]);
+            if (error) { showToast("Erreur de création du médecin"); return; }
+            
+            appState.allowedDoctors.push(newDoc);
             renderAllowedDoctors();
             idInput.value = '';
             nameInput.value = '';
@@ -573,22 +597,21 @@ function setupEventListeners() {
     // Visite Médicale
     document.getElementById('btn-add-visite').addEventListener('click', () => {
         document.getElementById('form-add-visite').reset();
-        
+
         const now = new Date();
         now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-        document.getElementById('visite-date').value = now.toISOString().slice(0,16);
+        document.getElementById('visite-date').value = now.toISOString().slice(0, 16);
         document.getElementById('visite-doctor').value = appState.currentDoctorName;
 
         document.getElementById('modal-add-visite').classList.add('active');
     });
 
-    document.getElementById('form-add-visite').addEventListener('submit', (e) => {
+    document.getElementById('form-add-visite').addEventListener('submit', async (e) => {
         e.preventDefault();
         const patient = appState.patients.find(p => p.id === appState.activePatientId);
         if (!patient) return;
 
         const formData = new FormData(e.target);
-        
         const q1 = formData.get('q1_conscience');
         const q2 = formData.get('q2_respiration');
         const q3 = formData.get('q3_rythme');
@@ -608,89 +631,66 @@ ${obs ? `**Observations :**\n${obs}` : ''}
         `.trim();
 
         const newIntervention = {
-            id: generateId(),
+            patient_id: patient.id,
             title: "Visite Médicale (QCM)",
             date: formData.get('date'),
-            doctor: formData.get('doctor'),
+            doctor_name: formData.get('doctor'),
             severity: q5.includes('Urgence') ? 'elevee' : (q5.includes('Légère') ? 'moyenne' : 'faible'),
             description: description,
             prescriptions: ""
         };
 
-        patient.interventions.push(newIntervention);
-        saveData();
+        const { error } = await _supabase.from('interventions').insert([newIntervention]);
+        if (error) { showToast("Erreur d'enregistrement"); return; }
         
         document.getElementById('modal-add-visite').classList.remove('active');
-        renderInterventions(patient);
+        openPatient(patient.id);
         showToast("Visite médicale enregistrée");
     });
+
     // Recrutement
     document.getElementById('btn-new-recrutement').addEventListener('click', () => {
         document.getElementById('form-recrutement').reset();
-        
         const now = new Date();
         now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
         document.getElementById('recrutement-date').value = now.toISOString().slice(0,16);
         document.getElementById('recrutement-evaluator').value = appState.currentDoctorName;
-
         document.getElementById('modal-add-recrutement').classList.add('active');
     });
 
-    document.getElementById('form-recrutement').addEventListener('submit', (e) => {
+    document.getElementById('form-recrutement').addEventListener('submit', async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
-        
-        const name = formData.get('candidate_name');
-        const q1 = formData.get('r_q1');
-        const q2 = formData.get('r_q2');
-        const q3 = formData.get('r_q3');
-        const q4 = formData.get('r_q4');
-        const decision = formData.get('r_decision');
-        const notes = formData.get('notes');
-
         const newRecrutement = {
             id: generateId(),
-            name: name,
+            name: formData.get('candidate_name'),
             evaluator: formData.get('evaluator'),
             date: formData.get('date'),
-            q1: q1,
-            q2: q2,
-            q3: q3,
-            q4: q4,
-            decision: decision,
-            notes: notes
+            q1: formData.get('r_q1'),
+            q2: formData.get('r_q2'),
+            q3: formData.get('r_q3'),
+            q4: formData.get('r_q4'),
+            decision: formData.get('r_decision'),
+            notes: formData.get('notes')
         };
 
-        appState.recrutements.push(newRecrutement);
-        saveData();
+        const { error } = await _supabase.from('recrutements').insert([newRecrutement]);
+        if (error) { showToast("Erreur d'enregistrement"); return; }
         
+        appState.recrutements.push(newRecrutement);
         document.getElementById('modal-add-recrutement').classList.remove('active');
         renderRecrutements();
         showToast("Évaluation de recrutement enregistrée");
     });
 
     // PPA
-    document.getElementById('btn-new-ppa').addEventListener('click', () => {
-        document.getElementById('form-ppa').reset();
-        
-        const now = new Date();
-        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-        document.getElementById('ppa-date').value = now.toISOString().slice(0,16);
-        document.getElementById('ppa-evaluator').value = appState.currentDoctorName;
-
-        document.getElementById('modal-add-ppa').classList.add('active');
-    });
-
-    document.getElementById('form-ppa').addEventListener('submit', (e) => {
+    document.getElementById('form-ppa').addEventListener('submit', async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
-        
-        const name = formData.get('candidate_name');
         const q1 = formData.get('p_q1');
         const q2 = formData.get('p_q2');
         const q3 = formData.get('p_q3');
         const q4 = formData.get('p_q4');
-        const notes = formData.get('notes');
 
         let score = 0;
         if (q1 === 'Oui') score += 10;
@@ -705,16 +705,19 @@ ${obs ? `**Observations :**\n${obs}` : ''}
 
         const newPpa = {
             id: generateId(),
-            name: name,
+            name: formData.get('candidate_name'),
             evaluator: formData.get('evaluator'),
             date: formData.get('date'),
-            q1, q2, q3, q4, notes,
-            score, decision
+            q1, q2, q3, q4, 
+            notes: formData.get('notes'),
+            score, 
+            decision
         };
 
-        appState.ppa.push(newPpa);
-        saveData();
+        const { error } = await _supabase.from('ppa').insert([newPpa]);
+        if (error) { showToast("Erreur d'enregistrement"); return; }
         
+        appState.ppa.push(newPpa);
         document.getElementById('modal-add-ppa').classList.remove('active');
         renderPpa();
         showToast("Test PPA automatisé terminé");
@@ -739,7 +742,7 @@ function renderPpa() {
     sorted.forEach(p => {
         const dateObj = new Date(p.date);
         const dateStr = dateObj.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
-        
+
         const isApte = p.decision === 'Apte';
         const statusColor = isApte ? 'var(--status-faible)' : 'var(--status-elevee)';
 
@@ -798,7 +801,7 @@ function renderRecrutements() {
     sorted.forEach(rec => {
         const dateObj = new Date(rec.date);
         const dateStr = dateObj.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
-        
+
         let statusColor = 'var(--text-muted)';
         let statusBadge = 'badge-outline';
         if (rec.decision === 'Accepté') { statusColor = 'var(--status-faible)'; statusBadge = ''; }
@@ -879,7 +882,7 @@ function renderAllowedDoctors() {
 }
 
 // Toggle password visibility in the doctor list
-window.togglePasswordVisibility = function(targetId, btnId, plainText) {
+window.togglePasswordVisibility = function (targetId, btnId, plainText) {
     const el = document.getElementById(targetId);
     if (!el) return;
     // List mode: plainText is provided
@@ -895,14 +898,14 @@ window.togglePasswordVisibility = function(targetId, btnId, plainText) {
 };
 
 // Toggle visibility of a password input field
-window.toggleInputPassword = function(inputId) {
+window.toggleInputPassword = function (inputId) {
     const input = document.getElementById(inputId);
     if (!input) return;
     input.type = input.type === 'password' ? 'text' : 'password';
 };
 
 // Open the change-password modal for a given doctor
-window.changePassword = function(docId) {
+window.changePassword = function (docId) {
     const doc = appState.allowedDoctors.find(d => d.id === docId);
     if (!doc) return;
 
@@ -921,7 +924,7 @@ window.changePassword = function(docId) {
 // Wire the confirm button for the change-password modal
 (function setupChangePwdModal() {
     document.addEventListener('DOMContentLoaded', () => {
-        document.getElementById('btn-confirm-change-pwd').addEventListener('click', () => {
+        document.getElementById('btn-confirm-change-pwd').addEventListener('click', async () => {
             const docId = document.getElementById('change-pwd-doctor-id').value;
             const newPwd = document.getElementById('change-pwd-new').value.trim();
             const confirmPwd = document.getElementById('change-pwd-confirm').value.trim();
@@ -938,51 +941,59 @@ window.changePassword = function(docId) {
                 return;
             }
 
+            const { error } = await _supabase.from('doctors').update({ password: newPwd }).eq('id', docId);
+            if (error) { showToast("Erreur lors du changement de mot de passe"); return; }
+            
             const doc = appState.allowedDoctors.find(d => d.id === docId);
-            if (doc) {
-                doc.password = newPwd;
-                saveData();
-                renderAllowedDoctors();
-                showToast(`Mot de passe mis à jour pour ${doc.name}`);
-            }
-
+            if (doc) doc.password = newPwd;
+            
+            renderAllowedDoctors();
+            showToast(`Mot de passe mis à jour`);
             document.getElementById('modal-change-password').classList.remove('active');
         });
     });
 })();
 
-window.removeDoctor = function(id) {
+window.removeDoctor = async function(id) {
     if (id.toLowerCase() === 'mancini13') {
         showToast("Impossible de retirer le Directeur Général Mancini13");
         return;
     }
-    appState.allowedDoctors = appState.allowedDoctors.filter(d => d.id !== id);
-    saveData();
-    renderAllowedDoctors();
-    showToast("Médecin retiré de la liste");
+    if(confirm("Retirer ce médecin ?")) {
+        const { error } = await _supabase.from('doctors').delete().eq('id', id);
+        if (error) { showToast("Erreur de suppression"); return; }
+        
+        appState.allowedDoctors = appState.allowedDoctors.filter(d => d.id !== id);
+        renderAllowedDoctors();
+        showToast("Médecin retiré");
+    }
 };
 
-window.deleteIntervention = function(patientId, intId) {
+window.deleteIntervention = async function(patientId, intId) {
     if(confirm("Supprimer cette intervention ?")) {
+        const { error } = await _supabase.from('interventions').delete().eq('id', intId);
+        if (error) { showToast("Erreur de suppression"); return; }
+        
         const p = appState.patients.find(x => x.id === patientId);
         if(p) {
             p.interventions = p.interventions.filter(i => i.id !== intId);
-            saveData();
             renderInterventions(p);
             showToast("Intervention supprimée");
         }
     }
 };
 
-window.editIntervention = function(patientId, intId) {
+window.editIntervention = async function(patientId, intId) {
     const p = appState.patients.find(x => x.id === patientId);
     if(p) {
         const int = p.interventions.find(i => i.id === intId);
         if(int) {
             const newDesc = prompt("Modifier la description :", int.description);
             if(newDesc !== null && newDesc.trim() !== "") {
+                const { error } = await _supabase.from('interventions').update({ description: newDesc.trim() }).eq('id', intId);
+                if (error) { showToast("Erreur de modification"); return; }
+                
                 int.description = newDesc.trim();
-                saveData();
                 renderInterventions(p);
                 showToast("Intervention modifiée");
             }
@@ -990,27 +1001,31 @@ window.editIntervention = function(patientId, intId) {
     }
 };
 
-window.deleteRecrutement = function(id) {
+window.deleteRecrutement = async function(id) {
     if(confirm("Supprimer cette évaluation de recrutement ?")) {
+        const { error } = await _supabase.from('recrutements').delete().eq('id', id);
+        if (error) { showToast("Erreur de suppression"); return; }
+        
         appState.recrutements = appState.recrutements.filter(r => r.id !== id);
-        saveData();
         renderRecrutements();
         showToast("Évaluation supprimée");
     }
 };
 
-window.deletePpa = function(id) {
+window.deletePpa = async function(id) {
     if(confirm("Supprimer cette évaluation PPA ?")) {
+        const { error } = await _supabase.from('ppa').delete().eq('id', id);
+        if (error) { showToast("Erreur de suppression"); return; }
+        
         appState.ppa = appState.ppa.filter(p => p.id !== id);
-        saveData();
         renderPpa();
         showToast("Évaluation supprimée");
     }
 };
 
-window.printPpaCert = function(id) {
+window.printPpaCert = function (id) {
     const p = appState.ppa.find(x => x.id === id);
-    if(!p) return;
+    if (!p) return;
 
     const dateObj = new Date(p.date);
     const dateStr = dateObj.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
