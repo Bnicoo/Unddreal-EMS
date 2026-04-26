@@ -541,15 +541,18 @@ function setupEventListeners() {
         const idInput = document.getElementById('new-doctor-id');
         const nameInput = document.getElementById('new-doctor-name');
         const rankInput = document.getElementById('new-doctor-rank');
+        const passwordInput = document.getElementById('new-doctor-password');
         const id = idInput.value.trim();
         const rpName = nameInput.value.trim();
         const rank = rankInput.value;
+        const password = passwordInput.value.trim() || 'password';
         if (id && rpName && !appState.allowedDoctors.some(d => d.id.toLowerCase() === id.toLowerCase())) {
-            appState.allowedDoctors.push({ id, name: rpName, rank });
+            appState.allowedDoctors.push({ id, name: rpName, rank, password });
             saveData();
             renderAllowedDoctors();
             idInput.value = '';
             nameInput.value = '';
+            passwordInput.value = '';
             showToast("Médecin ajouté");
         } else if (id) {
             showToast("Cet identifiant est déjà enregistré");
@@ -829,24 +832,69 @@ function renderAllowedDoctors() {
         return;
     }
     appState.allowedDoctors.forEach(doc => {
+        const pwdId = `pwd-${doc.id.replace(/[^a-zA-Z0-9]/g, '_')}`;
+        const eyeId = `eye-${doc.id.replace(/[^a-zA-Z0-9]/g, '_')}`;
         const div = document.createElement('div');
         div.style.display = 'flex';
         div.style.justifyContent = 'space-between';
         div.style.alignItems = 'center';
-        div.style.padding = '12px';
+        div.style.padding = '12px 16px';
         div.style.background = 'rgba(255, 255, 255, 0.03)';
         div.style.border = '1px solid rgba(255, 255, 255, 0.1)';
         div.style.marginBottom = '8px';
         div.style.borderRadius = '8px';
+        div.style.gap = '12px';
+        div.style.flexWrap = 'wrap';
         div.innerHTML = `
-            <span style="font-weight: 500;"><strong>[${doc.rank}]</strong> ${doc.name} <span style="opacity:0.5; font-size:0.85em; font-weight:normal;">(@${doc.id})</span></span>
-            <button class="btn-icon" onclick="removeDoctor('${doc.id}')" style="color: var(--danger);" title="Retirer">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-            </button>
+            <div style="flex: 1; min-width: 180px;">
+                <span style="font-weight: 600; display: block; margin-bottom: 2px;"><strong>[${doc.rank}]</strong> ${doc.name} <span style="opacity:0.5; font-size:0.85em; font-weight:normal;">(@${doc.id})</span></span>
+                <div style="display: flex; align-items: center; gap: 6px; margin-top: 4px;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.5;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    <span id="${pwdId}" style="font-family: monospace; font-size: 0.85em; letter-spacing: 2px; opacity: 0.7;">••••••••</span>
+                    <button type="button" id="${eyeId}" onclick="togglePasswordVisibility('${pwdId}', '${eyeId}', '${(doc.password || 'password').replace(/'/g, "&apos;")}')" style="background:none; border:none; cursor:pointer; color: var(--text-muted); padding:2px;" title="Afficher/masquer le mot de passe">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+                <button class="btn-secondary" onclick="changePassword('${doc.id}')" style="padding: 4px 10px; font-size: 0.8em;" title="Modifier le mot de passe">Changer MDP</button>
+                <button class="btn-icon" onclick="removeDoctor('${doc.id}')" style="color: var(--danger);" title="Retirer">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
         `;
         list.appendChild(div);
     });
 }
+
+// Toggle password visibility in the doctor list
+window.togglePasswordVisibility = function(targetId, btnId, plainText) {
+    const el = document.getElementById(targetId);
+    if (!el) return;
+    // List mode: plainText is provided
+    if (plainText !== undefined) {
+        const isHidden = el.textContent.includes('•');
+        el.textContent = isHidden ? plainText : '••••••••';
+        return;
+    }
+    // Input mode (new-doctor-password field)
+    const input = document.getElementById(targetId);
+    if (!input) return;
+    input.type = input.type === 'password' ? 'text' : 'password';
+};
+
+// Change the password of an existing doctor
+window.changePassword = function(docId) {
+    const doc = appState.allowedDoctors.find(d => d.id === docId);
+    if (!doc) return;
+    const newPwd = prompt(`Nouveau mot de passe pour ${doc.name} (@${doc.id}) :`);
+    if (newPwd !== null && newPwd.trim() !== '') {
+        doc.password = newPwd.trim();
+        saveData();
+        renderAllowedDoctors();
+        showToast(`Mot de passe mis à jour pour ${doc.name}`);
+    }
+};
 
 window.removeDoctor = function(id) {
     if (id.toLowerCase() === 'mancini13') {

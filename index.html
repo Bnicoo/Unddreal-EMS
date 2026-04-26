@@ -526,11 +526,11 @@
                 </button>
             </div>
             <div style="margin-bottom: 20px;">
-                <p class="subtitle" style="margin-bottom: 15px;">Ajoutez les identifiants de connexion, le nom complet et le grade des médecins.</p>
+                <p class="subtitle" style="margin-bottom: 15px;">Ajoutez les identifiants de connexion, le nom complet, le grade et le mot de passe des médecins.</p>
                 <form id="form-add-doctor" style="display:flex; flex-wrap: wrap; gap:10px;">
                     <input type="text" id="new-doctor-id" placeholder="Identifiant" required style="flex:1; min-width: 120px;">
                     <input type="text" id="new-doctor-name" placeholder="Nom Complet RP" required style="flex:1; min-width: 150px;">
-                    <select id="new-doctor-rank" style="padding: 12px; background: var(--surface-solid); border: 1px solid var(--border); border-radius: var(--radius-md);">
+                    <select id="new-doctor-rank" style="padding: 12px; background: var(--surface-solid); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-primary);">
                         <option value="Directeur Adjoint">Directeur Adjoint</option>
                         <option value="Chef de service">Chef de service</option>
                         <option value="Médecin senior">Médecin senior</option>
@@ -539,6 +539,12 @@
                         <option value="Stagiaire">Stagiaire</option>
                         <option value="Administrateur (Lecture Seule)">Administrateur (Lecture Seule)</option>
                     </select>
+                    <div style="position: relative; flex: 1; min-width: 150px;">
+                        <input type="password" id="new-doctor-password" placeholder="Mot de passe" required style="width: 100%; padding-right: 44px; box-sizing: border-box;">
+                        <button type="button" id="toggle-new-password" onclick="togglePasswordVisibility('new-doctor-password', 'toggle-new-password')" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color: var(--text-muted); padding:4px;" title="Afficher/masquer">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
                     <button type="submit" class="btn-primary" style="width: 100%;">Ajouter le Médecin</button>
                 </form>
             </div>
