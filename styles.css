@@ -699,8 +699,8 @@ header.hidden {
         width: 100%;
         color: #000 !important;
         font-family: 'Times New Roman', serif;
-        line-height: 1.6;
-        padding: 40px;
+        line-height: 1.5;
+        padding: 20px 40px;
         background: #fff !important;
     }
     body { 
@@ -708,11 +708,11 @@ header.hidden {
         margin: 0;
         padding: 0;
     }
-    .cert-title { text-align: center; font-size: 32px; font-weight: bold; margin-bottom: 30px; text-decoration: underline; color: #000; }
-    .cert-logo { text-align: center; font-size: 24px; font-weight: bold; margin-bottom: 50px; color: #000; border-bottom: 2px solid #000; padding-bottom: 10px; }
-    .cert-body { font-size: 18px; margin-bottom: 40px; color: #000; text-align: justify; }
-    .cert-footer { margin-top: 80px; text-align: right; font-style: italic; color: #000; font-size: 18px; }
-    .cert-status { font-weight: bold; font-size: 26px; margin: 30px 0; text-align: center; }
+    .cert-title { text-align: center; font-size: 28px; font-weight: bold; margin-bottom: 20px; text-decoration: underline; color: #000; }
+    .cert-logo { text-align: center; font-size: 22px; font-weight: bold; margin-bottom: 30px; color: #000; border-bottom: 2px solid #000; padding-bottom: 10px; }
+    .cert-body { font-size: 17px; margin-bottom: 20px; color: #000; text-align: justify; }
+    .cert-footer { margin-top: 40px; text-align: right; font-style: italic; color: #000; font-size: 17px; }
+    .cert-status { font-weight: bold; font-size: 24px; margin: 20px 0; text-align: center; }
     .cert-apte { color: #008000 !important; }
     .cert-inapte { color: #cc0000 !important; }
 }

@@ -1065,7 +1065,7 @@ window.printPpaCert = function (id) {
         
         <div class="cert-body">
             <p>Je soussigné(e), <strong>${p.evaluator}</strong>, certifie avoir examiné ce jour, le <strong>${dateStr}</strong>, le/la candidat(e) :</p>
-            <p style="font-size: 22px; text-align: center; font-weight: bold; margin: 30px 0;">${p.name}</p>
+            <p style="font-size: 20px; text-align: center; font-weight: bold; margin: 15px 0;">${p.name}</p>
             <p>Cet examen comprenait une évaluation médicale générale, psychologique, ainsi que des mises en situation de stress et de jugement conformément à la législation en vigueur pour la délivrance d'un Permis de Port d'Arme (PPA).</p>
             
             <p>À l'issue de cet examen, et d'après les déclarations du candidat et mes observations cliniques, je déclare le candidat :</p>
@@ -1074,12 +1074,12 @@ window.printPpaCert = function (id) {
                 ${isApte ? 'APTE AU PORT D\'ARME' : 'INAPTE AU PORT D\'ARME'}
             </div>
             
-            ${!isApte ? `<p>Motif(s) médical(s) de l'inaptitude lié(s) aux résultats du test (Score : ${p.score}/10). Le candidat présente des facteurs de risques incompatibles avec la détention d'une arme à feu.</p>` : ''}
+            ${!isApte ? `<p style="margin-top: 10px;">Motif(s) médical(s) de l'inaptitude lié(s) aux résultats du test (Score : ${p.score}/10). Le candidat présente des facteurs de risques incompatibles avec la détention d'une arme à feu.</p>` : ''}
         </div>
         
         <div class="cert-footer">
             <p>Fait pour valoir ce que de droit.</p>
-            <p style="margin-top: 30px; font-weight: bold;">Signature du Médecin :<br><br>_____________________<br><br>${p.evaluator}</p>
+            <p style="margin-top: 20px; font-weight: bold;">Signature du Médecin :<br><br>_____________________<br><br>${p.evaluator}</p>
         </div>
     `;
 
