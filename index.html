@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedRP - Système de Gestion Médicale</title>
+    <meta name="description" content="Plateforme RP de gestion de dossiers patients et interventions médicales.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Header -->
+    <header id="main-header" class="hidden">
+        <div class="header-content">
+            <div class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                </svg>
+                <span>Med<strong>RP</strong></span>
+            </div>
+            <div class="nav-links">
+                <button class="nav-btn active" id="nav-patients">Dossiers Patients</button>
+                <button class="nav-btn" id="nav-recrutement">Recrutements</button>
+                <button class="nav-btn" id="nav-ppa">Tests PPA</button>
+                <button class="nav-btn" id="nav-reglement">Règlement EMS</button>
+            </div>
+            <div class="user-profile">
+                <span id="doctor-name-display">Dr. Inconnu</span>
+                <button id="settings-btn" class="btn-icon" title="Paramètres de Modération">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                </button>
+                <button id="logout-btn" class="btn-icon" title="Déconnexion">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main id="app-container">
+        <!-- View: Login -->
+        <section id="view-login" class="view active">
+            <div class="login-wrapper">
+                <div class="login-card glass-panel">
+                    <div class="login-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                        </svg>
+                    </div>
+                    <h1>Portail Médical</h1>
+                    <p class="subtitle">Veuillez vous identifier pour accéder aux dossiers.</p>
+                    
+                    <form id="login-form">
+                        <div class="input-group">
+                            <label for="doctor-name">Identifiant Médecin</label>
+                            <input type="text" id="doctor-name" placeholder="Ex: Dr. House" required autocomplete="off">
+                        </div>
+                        <div class="input-group">
+                            <label for="doctor-password">Mot de passe</label>
+                            <input type="password" id="doctor-password" placeholder="Votre mot de passe" required autocomplete="off">
+                        </div>
+                        <button type="submit" class="btn-primary">
+                            <span>Se connecter</span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                                <polyline points="12 5 19 12 12 19"/>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- View: Dashboard (Patients List) -->
+        <section id="view-dashboard" class="view hidden">
+            <div class="container">
+                <div class="page-header">
+                    <div>
+                        <h2>Dossiers Patients</h2>
+                        <p class="subtitle">Gérez et consultez la liste de vos patients.</p>
+                    </div>
+                    <button class="btn-primary" id="btn-new-patient">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        Nouveau Patient
+                    </button>
+                </div>
+
+                <div class="search-bar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input type="text" id="search-patient" placeholder="Rechercher un patient par nom, prénom ou ID...">
+                </div>
+
+                <div id="patients-grid" class="patients-grid">
+                    <!-- Patients will be injected here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- View: Recrutement -->
+        <section id="view-recrutement" class="view hidden">
+            <div class="container">
+                <div class="page-header">
+                    <div>
+                        <h2>Recrutements</h2>
+                        <p class="subtitle">Évaluation des candidats : QCM et Mises en Situation.</p>
+                    </div>
+                    <button class="btn-primary" id="btn-new-recrutement">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        Nouveau Candidat
+                    </button>
+                </div>
+
+                <div id="recrutement-grid" class="patients-grid">
+                    <!-- Recrutements will be injected here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- View: PPA -->
+        <section id="view-ppa" class="view hidden">
+            <div class="container">
+                <div class="page-header">
+                    <div>
+                        <h2>Tests PPA (Port d'Arme)</h2>
+                        <p class="subtitle">Évaluation médicale et psychologique automatique pour le Permis de Port d'Arme.</p>
+                    </div>
+                    <button class="btn-primary" id="btn-new-ppa">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        Nouveau Test PPA
+                    </button>
+                </div>
+                <div id="ppa-grid" class="patients-grid">
+                    <!-- PPA will be injected here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- View: Patient Details -->
+        <section id="view-patient" class="view hidden">
+            <div class="container">
+                <button class="btn-back" id="btn-back-dashboard">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"/>
+                        <polyline points="12 19 5 12 12 5"/>
+                    </svg>
+                    Retour aux dossiers
+                </button>
+
+                <div class="patient-profile glass-panel">
+                    <div class="profile-header">
+                        <div class="avatar" id="patient-detail-avatar">AB</div>
+                        <div class="profile-info">
+                            <h2 id="patient-detail-name">Nom du Patient</h2>
+                            <div class="profile-meta">
+                                <span class="badge" id="patient-detail-age">-- ans</span>
+                                <span class="badge badge-outline" id="patient-detail-gender">Genre</span>
+                                <span class="badge badge-outline">ID: <span id="patient-detail-id">---</span></span>
+                            </div>
+                        </div>
+                        <div id="patient-admin-actions" style="margin-left: auto; display: none; gap: 8px;">
+                            <button class="btn-secondary" id="btn-edit-patient">Modifier</button>
+                            <button class="btn-primary" id="btn-delete-patient" style="background: var(--status-elevee); box-shadow: none;">Supprimer</button>
+                        </div>
+                    </div>
+                    <div class="profile-details">
+                        <div class="detail-group">
+                            <label>Groupe Sanguin</label>
+                            <p id="patient-detail-blood">--</p>
+                        </div>
+                        <div class="detail-group">
+                            <label>Allergies</label>
+                            <p id="patient-detail-allergies">Aucune connue</p>
+                        </div>
+                        <div class="detail-group">
+                            <label>Antécédents</label>
+                            <p id="patient-detail-history">Aucun</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="interventions-section">
+                    <div class="section-header">
+                        <h3>Historique des Interventions</h3>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn-secondary" id="btn-add-visite">
+                                Visite médicale
+                            </button>
+                            <button class="btn-secondary" id="btn-add-intervention">
+                                + Nouvelles interventions
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline" id="interventions-timeline">
+                        <!-- Interventions will be injected here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- View: Règlement -->
+        <section id="view-reglement" class="view hidden">
+            <div class="container" style="max-width: 800px; margin: 0 auto;">
+                <div class="header-actions">
+                    <h2>Règlement EMS</h2>
+                </div>
+                
+                <div class="glass-panel" style="padding: 40px; font-size: 1.05em; line-height: 1.6; background-color: #000000; border: 1px solid #333;">
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--primary); margin-bottom: 10px;">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                        <h3 style="font-size: 1.8em; color: var(--primary);">Code de Déontologie & Règlement Interne</h3>
+                        <p style="color: rgba(255,255,255,0.6);">Service Médical d'Urgence</p>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <h4 style="color: var(--primary); font-size: 1.2em; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                            <span style="background: var(--primary); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8em;">1</span>
+                            Préambule
+                        </h4>
+                        <p>Le service EMS représente l'ensemble du corps médical du serveur.<br>
+                        Chaque membre s'engage à respecter un rôle-play sérieux, cohérent et professionnel en toutes circonstances.<br>
+                        Toute infraction à ce règlement pourra entraîner des sanctions allant de l'avertissement à l'exclusion définitive.</p>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <h4 style="color: var(--primary); font-size: 1.2em; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                            <span style="background: var(--primary); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8em;">2</span>
+                            Comportement général
+                        </h4>
+                        <ul style="list-style-type: disc; margin-left: 20px; color: rgba(255,255,255,0.8);">
+                            <li>Tout EMS doit faire preuve de respect, calme et professionnalisme envers tous les joueurs.</li>
+                            <li>Le RP médical doit être prioritaire sur toute autre interaction.</li>
+                            <li>Les comportements troll, abusifs ou non réalistes sont strictement interdits.</li>
+                            <li>Lorsqu'il y a une facture veuillez bien attendre que la personne paye bien la facture.</li>
+                        </ul>
+                        <strong style="display: block; margin-top: 10px; color: white;">En civil :</strong>
+                        <p>Vous représentez toujours le monde médical et devez conserver une image irréprochable, même hors service.</p>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <h4 style="color: var(--primary); font-size: 1.2em; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                            <span style="background: var(--primary); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8em;">3</span>
+                            Gestion des interventions
+                        </h4>
+                        <p>Il est interdit de faire des préférences dans le traitement des appels ou des réanimations.<br>
+                        Chaque intervention doit être traitée de manière équitable et impartiale.</p>
+                        <strong style="display: block; margin-top: 10px; color: white;">Exceptions :</strong>
+                        <p>Les demandes des services suivants sont prioritaires :</p>
+                        <ul style="list-style-type: circle; margin-left: 20px; color: rgba(255,255,255,0.8);">
+                            <li>SASP</li>
+                            <li>US Marshal</li>
+                            <li>SASP Nord</li>
+                        </ul>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <h4 style="color: var(--primary); font-size: 1.2em; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                            <span style="background: var(--primary); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8em;">4</span>
+                            Tarification des soins
+                        </h4>
+                        <p>Les EMS ont interdiction formelle de surfacturer un joueur.<br>
+                        Chaque intervention doit respecter une grille tarifaire officielle, basée sur :</p>
+                        <ul style="list-style-type: disc; margin-left: 20px; color: rgba(255,255,255,0.8);">
+                            <li>Le type de soins</li>
+                            <li>La gravité de la blessure</li>
+                            <li>Le matériel utilisé</li>
+                            <li>Le déplacement</li>
+                        </ul>
+                        <p style="color: var(--status-elevee); margin-top: 5px;">Toute tentative d'abus financier sera considérée comme une faute grave.</p>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <h4 style="color: var(--primary); font-size: 1.2em; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                            <span style="background: var(--primary); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8em;">5</span>
+                            Véhicules et conduite
+                        </h4>
+                        <p>Interdiction totale d'utiliser les véhicules EMS à des fins personnelles.<br>
+                        Les véhicules doivent être utilisés uniquement dans un cadre professionnel RP.</p>
+                        <strong style="display: block; margin-top: 10px; color: white;">Conduite :</strong>
+                        <p>Une conduite cohérente, sécurisée et professionnelle est exigée. Les comportements suivants sont interdits :</p>
+                        <ul style="list-style-type: disc; margin-left: 20px; color: rgba(255,255,255,0.8);">
+                            <li>Conduite dangereuse injustifiée</li>
+                            <li>Utilisation abusive des sirènes</li>
+                            <li>Courses ou comportements non RP</li>
+                        </ul>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <h4 style="color: var(--primary); font-size: 1.2em; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                            <span style="background: var(--primary); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8em;">6</span>
+                            Recrutement et passé judiciaire
+                        </h4>
+                        <p>Un passé illégal est toléré uniquement si le casier judiciaire est vierge au moment de la candidature.<br>
+                        Toute fausse déclaration entraînera un refus immédiat ou une exclusion.</p>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <h4 style="color: var(--primary); font-size: 1.2em; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                            <span style="background: var(--primary); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8em;">7</span>
+                            Éthique médicale
+                        </h4>
+                        <strong style="display: block; margin-top: 5px; color: white;">Les EMS doivent :</strong>
+                        <ul style="list-style-type: disc; margin-left: 20px; color: rgba(255,255,255,0.8);">
+                            <li>Sauver toute vie sans discrimination</li>
+                            <li>Respecter le secret médical</li>
+                            <li>Agir dans l'intérêt du patient</li>
+                        </ul>
+                        <strong style="display: block; margin-top: 10px; color: white;">Il est interdit de :</strong>
+                        <ul style="list-style-type: disc; margin-left: 20px; color: rgba(255,255,255,0.8);">
+                            <li>Refuser un patient sans raison RP valable</li>
+                            <li>Favoriser un joueur pour des raisons personnelles</li>
+                        </ul>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <h4 style="color: var(--primary); font-size: 1.2em; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                            <span style="background: var(--primary); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8em;">8</span>
+                            Discipline et sanctions
+                        </h4>
+                        <p>Les sanctions sont appliquées selon la gravité des faits : <br>
+                        <span style="color: var(--status-moyenne);">Avertissement</span> / <span style="color: var(--status-elevee);">Blâme - Suspension</span> / <span style="color: var(--danger);">Exclusion définitive</span></p>
+                        <strong style="display: block; margin-top: 10px; color: white;">Les fautes graves incluent :</strong>
+                        <ul style="list-style-type: disc; margin-left: 20px; color: rgba(255,255,255,0.8);">
+                            <li>Abus de pouvoir</li>
+                            <li>Non-respect des priorités</li>
+                            <li>Non-respect du RP médical</li>
+                            <li>Utilisation abusive des ressources EMS</li>
+                        </ul>
+                    </div>
+
+                    <div style="margin-bottom: 10px; padding: 20px; background: rgba(0, 204, 153, 0.1); border-left: 4px solid var(--primary); border-radius: 4px;">
+                        <h4 style="color: var(--primary); font-size: 1.2em; margin-bottom: 5px;">9. Engagement</h4>
+                        <p style="margin: 0;">Tout membre EMS s'engage à : <br>
+                        <strong>Respecter ce règlement • Maintenir un RP de qualité • Représenter dignement le service médical</strong></p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modals -->
+    <!-- Modal: Add Patient -->
+    <div id="modal-add-patient" class="modal-overlay hidden">
+        <div class="modal glass-panel">
+            <div class="modal-header">
+                <h3>Nouveau Dossier Patient</h3>
+                <button class="btn-close modal-close">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <form id="form-add-patient">
+                <div class="form-row">
+                    <div class="input-group">
+                        <label>Prénom</label>
+                        <input type="text" name="firstName" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Nom</label>
+                        <input type="text" name="lastName" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="input-group">
+                        <label>Âge</label>
+                        <input type="number" name="age" required min="0" max="150">
+                    </div>
+                    <div class="input-group">
+                        <label>Sexe</label>
+                        <select name="gender" required>
+                            <option value="M">Masculin</option>
+                            <option value="F">Féminin</option>
+                            <option value="Autre">Autre</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Groupe Sanguin</label>
+                        <select name="bloodType">
+                            <option value="Inconnu">Inconnu</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Allergies</label>
+                    <input type="text" name="allergies" placeholder="Ex: Pénicilline, Arachides...">
+                </div>
+                <div class="input-group">
+                    <label>Antécédents Médicaux</label>
+                    <textarea name="history" rows="3" placeholder="Ex: Diabète type 2, Opération de l'appendicite (2018)..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-ghost modal-close">Annuler</button>
+                    <button type="submit" class="btn-primary">Créer le dossier</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Add Intervention -->
+    <div id="modal-add-intervention" class="modal-overlay hidden">
+        <div class="modal glass-panel">
+            <div class="modal-header">
+                <h3>Ajouter une Intervention</h3>
+                <button class="btn-close modal-close">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <form id="form-add-intervention">
+                <div class="input-group">
+                    <label>Titre de l'intervention</label>
+                    <input type="text" name="title" placeholder="Ex: Consultation de routine, Points de suture..." required>
+                </div>
+                <div class="form-row">
+                    <div class="input-group">
+                        <label>Date et Heure</label>
+                        <input type="datetime-local" name="date" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Médecin traitant</label>
+                        <input type="text" name="doctor" id="intervention-doctor" readonly>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Gravité / État</label>
+                    <select name="severity">
+                        <option value="faible">Faible (Routine)</option>
+                        <option value="moyenne">Moyenne (Urgence mineure)</option>
+                        <option value="elevee">Élevée (Urgence majeure)</option>
+                        <option value="critique">Critique (Pronostic vital engagé)</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Soins prodigués (Facturation)</label>
+                    <div class="checkbox-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-height: 200px; overflow-y: auto; background: var(--surface-solid); padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--border);">
+                        <!-- Soins de base -->
+                        <label class="checkbox-option" style="display: flex; align-items: center; gap: 8px; font-size: 0.9em; cursor: pointer;"><input type="checkbox" name="soins" value="Premiers secours" data-price="700" style="width:16px;height:16px;accent-color:var(--primary);"><span>Premiers secours (700 $)</span></label>
+                        <label class="checkbox-option" style="display: flex; align-items: center; gap: 8px; font-size: 0.9em; cursor: pointer;"><input type="checkbox" name="soins" value="Examen complet" data-price="800" style="width:16px;height:16px;accent-color:var(--primary);"><span>Examen complet (800 $)</span></label>
+                        <!-- Interventions -->
+                        <label class="checkbox-option" style="display: flex; align-items: center; gap: 8px; font-size: 0.9em; cursor: pointer;"><input type="checkbox" name="soins" value="Chirurgie mineure" data-price="500" style="width:16px;height:16px;accent-color:var(--primary);"><span>Chirurgie mineure (500 $)</span></label>
+                        <label class="checkbox-option" style="display: flex; align-items: center; gap: 8px; font-size: 0.9em; cursor: pointer;"><input type="checkbox" name="soins" value="Chirurgie majeure" data-price="1500" style="width:16px;height:16px;accent-color:var(--primary);"><span>Chirurgie majeure (1500 $)</span></label>
+                        <label class="checkbox-option" style="display: flex; align-items: center; gap: 8px; font-size: 0.9em; cursor: pointer;"><input type="checkbox" name="soins" value="Réanimation" data-price="2500" style="width:16px;height:16px;accent-color:var(--primary);"><span>Réanimation (2500 $)</span></label>
+                        <label class="checkbox-option" style="display: flex; align-items: center; gap: 8px; font-size: 0.9em; cursor: pointer;"><input type="checkbox" name="soins" value="Radiologie" data-price="400" style="width:16px;height:16px;accent-color:var(--primary);"><span>Radiologie (400 $)</span></label>
+                        <!-- Fournitures -->
+                        <label class="checkbox-option" style="display: flex; align-items: center; gap: 8px; font-size: 0.9em; cursor: pointer;"><input type="checkbox" name="soins" value="Kit de médicaments" data-price="200" style="width:16px;height:16px;accent-color:var(--primary);"><span>Kit de médicaments (200 $)</span></label>
+                        <label class="checkbox-option" style="display: flex; align-items: center; gap: 8px; font-size: 0.9em; cursor: pointer;"><input type="checkbox" name="soins" value="Fauteuil Roulant" data-price="4500" style="width:16px;height:16px;accent-color:var(--primary);"><span>Fauteuil Roulant (4500 $)</span></label>
+                        <!-- Déplacement -->
+                        <label class="checkbox-option" style="display: flex; align-items: center; gap: 8px; font-size: 0.9em; cursor: pointer;"><input type="checkbox" name="soins" value="Déplacement -5 KM" data-price="300" style="width:16px;height:16px;accent-color:var(--primary);"><span>Déplacement -5 KM (300 $)</span></label>
+                        <label class="checkbox-option" style="display: flex; align-items: center; gap: 8px; font-size: 0.9em; cursor: pointer;"><input type="checkbox" name="soins" value="Déplacement +5 KM" data-price="600" style="width:16px;height:16px;accent-color:var(--primary);"><span>Déplacement +5 KM (600 $)</span></label>
+                        <!-- Administratif -->
+                        <label class="checkbox-option" style="display: flex; align-items: center; gap: 8px; font-size: 0.9em; cursor: pointer;"><input type="checkbox" name="soins" value="Bilan Médical" data-price="1000" style="width:16px;height:16px;accent-color:var(--primary);"><span>Bilan Médical (1000 $)</span></label>
+                        <label class="checkbox-option" style="display: flex; align-items: center; gap: 8px; font-size: 0.9em; cursor: pointer;"><input type="checkbox" name="soins" value="Permis de Port d'Armes" data-price="12000" style="width:16px;height:16px;accent-color:var(--primary);"><span>Permis de Port d'Armes (12000 $)</span></label>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Total Facture</label>
+                    <div style="font-size: 1.5em; font-weight: bold; color: var(--primary);" id="intervention-total-price">0 $</div>
+                    <input type="hidden" name="totalPrice" id="input-total-price" value="0">
+                </div>
+                <div class="input-group">
+                    <label>Notes supplémentaires</label>
+                    <textarea name="notes" rows="2" placeholder="Symptômes spécifiques, remarques..."></textarea>
+                </div>
+                <div class="input-group">
+                    <label>Prescriptions / Recommandations</label>
+                    <textarea name="prescriptions" rows="2" placeholder="Médicaments prescrits, repos..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-ghost modal-close">Annuler</button>
+                    <button type="submit" class="btn-primary">Enregistrer l'intervention</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Settings -->
+    <div id="modal-settings" class="modal-overlay hidden">
+        <div class="modal glass-panel">
+            <div class="modal-header">
+                <h3>Paramètres de Modération</h3>
+                <button class="btn-close modal-close">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <p class="subtitle" style="margin-bottom: 15px;">Ajoutez les identifiants de connexion, le nom complet et le grade des médecins.</p>
+                <form id="form-add-doctor" style="display:flex; flex-wrap: wrap; gap:10px;">
+                    <input type="text" id="new-doctor-id" placeholder="Identifiant" required style="flex:1; min-width: 120px;">
+                    <input type="text" id="new-doctor-name" placeholder="Nom Complet RP" required style="flex:1; min-width: 150px;">
+                    <select id="new-doctor-rank" style="padding: 12px; background: var(--surface-solid); border: 1px solid var(--border); border-radius: var(--radius-md);">
+                        <option value="Directeur Adjoint">Directeur Adjoint</option>
+                        <option value="Chef de service">Chef de service</option>
+                        <option value="Médecin senior">Médecin senior</option>
+                        <option value="Médecin" selected>Médecin</option>
+                        <option value="Interne">Interne</option>
+                        <option value="Stagiaire">Stagiaire</option>
+                        <option value="Administrateur (Lecture Seule)">Administrateur (Lecture Seule)</option>
+                    </select>
+                    <button type="submit" class="btn-primary" style="width: 100%;">Ajouter le Médecin</button>
+                </form>
+            </div>
+            <div class="timeline" id="allowed-doctors-list">
+                <!-- Allowed doctors injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Add Visite -->
+    <div id="modal-add-visite" class="modal-overlay hidden">
+        <div class="modal glass-panel" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>Nouvelle Visite Médicale</h3>
+                <button class="btn-close modal-close">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <form id="form-add-visite">
+                <div class="input-group">
+                    <label>1. État de conscience</label>
+                    <div class="qcm-group">
+                        <label class="qcm-option">
+                            <input type="radio" name="q1_conscience" value="Conscient" required>
+                            <span>Conscient</span>
+                        </label>
+                        <label class="qcm-option">
+                            <input type="radio" name="q1_conscience" value="Altéré" required>
+                            <span>Altéré</span>
+                        </label>
+                        <label class="qcm-option">
+                            <input type="radio" name="q1_conscience" value="Inconscient" required>
+                            <span>Inconscient</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>2. Respiration</label>
+                    <div class="qcm-group">
+                        <label class="qcm-option">
+                            <input type="radio" name="q2_respiration" value="Normale" required>
+                            <span>Normale</span>
+                        </label>
+                        <label class="qcm-option">
+                            <input type="radio" name="q2_respiration" value="Rapide" required>
+                            <span>Rapide</span>
+                        </label>
+                        <label class="qcm-option">
+                            <input type="radio" name="q2_respiration" value="Difficile" required>
+                            <span>Difficile</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>3. Rythme Cardiaque</label>
+                    <div class="qcm-group">
+                        <label class="qcm-option">
+                            <input type="radio" name="q3_rythme" value="Normal" required>
+                            <span>Normal</span>
+                        </label>
+                        <label class="qcm-option">
+                            <input type="radio" name="q3_rythme" value="Rapide (Tachycardie)" required>
+                            <span>Rapide</span>
+                        </label>
+                        <label class="qcm-option">
+                            <input type="radio" name="q3_rythme" value="Lent (Bradycardie)" required>
+                            <span>Lent</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>4. Niveau de Douleur</label>
+                    <div class="qcm-group">
+                        <label class="qcm-option">
+                            <input type="radio" name="q4_douleur" value="Aucune" required>
+                            <span>Aucune</span>
+                        </label>
+                        <label class="qcm-option">
+                            <input type="radio" name="q4_douleur" value="Légère" required>
+                            <span>Légère</span>
+                        </label>
+                        <label class="qcm-option">
+                            <input type="radio" name="q4_douleur" value="Modérée" required>
+                            <span>Modérée</span>
+                        </label>
+                        <label class="qcm-option">
+                            <input type="radio" name="q4_douleur" value="Sévère" required>
+                            <span>Sévère</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>5. Bilan Global / Gravité</label>
+                    <div class="qcm-group">
+                        <label class="qcm-option">
+                            <input type="radio" name="q5_bilan" value="Sain / Stable" required>
+                            <span>Stable</span>
+                        </label>
+                        <label class="qcm-option">
+                            <input type="radio" name="q5_bilan" value="Blessure Légère" required>
+                            <span>Blessure Légère</span>
+                        </label>
+                        <label class="qcm-option">
+                            <input type="radio" name="q5_bilan" value="Grave / Urgence" required>
+                            <span>Urgence</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Observations Supplémentaires (Optionnel)</label>
+                    <textarea name="observations" rows="2" placeholder="Détails, traitements ou remarques particulières..."></textarea>
+                </div>
+
+                <input type="hidden" name="date" id="visite-date">
+                <input type="hidden" name="doctor" id="visite-doctor">
+                <div style="margin-top: 20px;">
+                    <button type="submit" class="btn-primary" style="width: 100%;">
+                        Enregistrer la visite
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Add Recrutement -->
+    <div id="modal-add-recrutement" class="modal-overlay hidden">
+        <div class="modal glass-panel" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3>Nouveau Test de Recrutement</h3>
+                <button class="btn-close modal-close">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <form id="form-recrutement">
+                <div class="input-group">
+                    <label>Nom du Candidat</label>
+                    <input type="text" name="candidate_name" required>
+                </div>
+                
+                <h4 style="margin: 20px 0 10px; color: var(--primary);">Questions Théoriques</h4>
+                <div class="input-group">
+                    <label>1. Ratio de compressions/ventilations lors d'une RCP adulte ?</label>
+                    <div class="qcm-group">
+                        <label class="qcm-option"><input type="radio" name="r_q1" value="15/2" required><span>15/2</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_q1" value="30/2" required><span>30/2</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_q1" value="50/5" required><span>50/5</span></label>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>2. Que faire face à une plaie artérielle massive à une jambe ?</label>
+                    <div class="qcm-group">
+                        <label class="qcm-option"><input type="radio" name="r_q2" value="Pansement simple" required><span>Pansement simple</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_q2" value="Garrot / Compression" required><span>Garrot / Compression</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_q2" value="Attendre un supérieur" required><span>Attendre</span></label>
+                    </div>
+                </div>
+
+                <h4 style="margin: 20px 0 10px; color: var(--primary);">Mises en Situation Pratiques</h4>
+                <div class="input-group">
+                    <label>3. Situation : Un homme se plaint d'une forte douleur au thorax irradiant dans le bras gauche. Action immédiate ?</label>
+                    <div class="qcm-group">
+                        <label class="qcm-option"><input type="radio" name="r_q3" value="ECG immédiat" required><span>ECG immédiat</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_q3" value="Antidouleur" required><span>Antidouleur</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_q3" value="Renvoyer chez lui" required><span>Renvoyer chez lui</span></label>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>4. Situation : Chute de 3 mètres, patient inconscient. Votre priorité ?</label>
+                    <div class="qcm-group">
+                        <label class="qcm-option"><input type="radio" name="r_q4" value="Réveiller le patient" required><span>Réveiller le patient</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_q4" value="Maintien cervical + ABC" required><span>Maintien cervical + ABC</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_q4" value="Le relever" required><span>Le relever</span></label>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Évaluation Globale / Décision</label>
+                    <div class="qcm-group">
+                        <label class="qcm-option"><input type="radio" name="r_decision" value="Accepté" required><span>Accepté</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_decision" value="En attente" required><span>En attente</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_decision" value="Refusé" required><span>Refusé</span></label>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Notes d'entretien (Optionnel)</label>
+                    <textarea name="notes" rows="3" placeholder="Attitude, motivation..."></textarea>
+                </div>
+
+                <input type="hidden" name="date" id="recrutement-date">
+                <input type="hidden" name="evaluator" id="recrutement-evaluator">
+                <div style="margin-top: 20px;">
+                    <button type="submit" class="btn-primary" style="width: 100%;">Enregistrer l'évaluation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Add PPA -->
+    <div id="modal-add-ppa" class="modal-overlay hidden">
+        <div class="modal glass-panel" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3>Évaluation Médicale PPA</h3>
+                <button class="btn-close modal-close">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <form id="form-ppa">
+                <div class="input-group">
+                    <label>Nom du Candidat</label>
+                    <input type="text" name="candidate_name" required>
+                </div>
+                
+                <h4 style="margin: 20px 0 10px; color: var(--primary);">Santé Générale & Antécédents</h4>
+                <div class="input-group">
+                    <label>1. Avez-vous des antécédents de troubles neurologiques, épilepsie ou tremblements fréquents ?</label>
+                    <div class="qcm-group">
+                        <label class="qcm-option"><input type="radio" name="p_q1" value="Non" required><span>Non</span></label>
+                        <label class="qcm-option"><input type="radio" name="p_q1" value="Oui"><span>Oui</span></label>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>2. Avez-vous déjà été suivi pour des troubles psychiatriques ou de la colère ?</label>
+                    <div class="qcm-group">
+                        <label class="qcm-option"><input type="radio" name="p_q2" value="Jamais" required><span>Jamais</span></label>
+                        <label class="qcm-option"><input type="radio" name="p_q2" value="Anciennement"><span>Anciennement</span></label>
+                        <label class="qcm-option"><input type="radio" name="p_q2" value="Récemment"><span>Récemment</span></label>
+                    </div>
+                </div>
+
+                <h4 style="margin: 20px 0 10px; color: var(--primary);">Psychologie & Mises en situation</h4>
+                <div class="input-group">
+                    <label>3. Comment réagissez-vous lors d'une altercation verbale intense (provocation) ?</label>
+                    <div class="qcm-group">
+                        <label class="qcm-option"><input type="radio" name="p_q3" value="Je garde mon sang-froid" required><span>Garder son sang-froid</span></label>
+                        <label class="qcm-option"><input type="radio" name="p_q3" value="J'hausse le ton"><span>Hausser le ton</span></label>
+                        <label class="qcm-option"><input type="radio" name="p_q3" value="Je deviens agressif"><span>Devenir agressif</span></label>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>4. Situation : Un individu vous insulte lourdement dans la rue. Que faites-vous ?</label>
+                    <div class="qcm-group">
+                        <label class="qcm-option"><input type="radio" name="p_q4" value="Je l'ignore" required><span>L'ignorer</span></label>
+                        <label class="qcm-option"><input type="radio" name="p_q4" value="Je sors mon arme"><span>Sortir son arme</span></label>
+                        <label class="qcm-option"><input type="radio" name="p_q4" value="Je l'insulte en retour"><span>Insulter en retour</span></label>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Notes du Médecin (Optionnel)</label>
+                    <textarea name="notes" rows="2" placeholder="Observations..."></textarea>
+                </div>
+
+                <input type="hidden" name="date" id="ppa-date">
+                <input type="hidden" name="evaluator" id="ppa-evaluator">
+                <div style="margin-top: 20px;">
+                    <button type="submit" class="btn-primary" style="width: 100%;">Valider et Évaluer le PPA automatique</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="print-container" class="print-only"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
