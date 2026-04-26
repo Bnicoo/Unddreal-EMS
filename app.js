@@ -1018,7 +1018,7 @@ window.printPpaCert = function(id) {
 
     const container = document.getElementById('print-container');
     container.innerHTML = `
-        <div class="cert-logo">MedRP - Pôle de Médecine Légale et d'Évaluation</div>
+        <div class="cert-logo">Unddreal EMS - Pôle de Médecine Légale et d'Évaluation</div>
         <div class="cert-title">CERTIFICAT D'APTITUDE<br>AU PORT D'ARME (PPA)</div>
         
         <div class="cert-body">
