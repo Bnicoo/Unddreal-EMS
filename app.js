@@ -46,7 +46,12 @@ async function loadData() {
 
         // Load Patients
         const { data: patients } = await _supabase.from('patients').select('*');
-        appState.patients = patients || [];
+        appState.patients = (patients || []).map(p => ({
+            ...p,
+            firstName: p.first_name,
+            lastName: p.last_name,
+            bloodType: p.blood_type
+        }));
 
         // Load Recrutements
         const { data: recrutements } = await _supabase.from('recrutements').select('*');
@@ -459,22 +464,30 @@ function setupEventListeners() {
         const formData = new FormData(e.target);
         
         const patientData = {
-            firstName: formData.get('firstName'),
-            lastName: formData.get('lastName'),
+            first_name: formData.get('firstName'),
+            last_name: formData.get('lastName'),
             age: parseInt(formData.get('age')),
             gender: formData.get('gender'),
-            bloodType: formData.get('bloodType'),
+            blood_type: formData.get('bloodType'),
             allergies: formData.get('allergies'),
             history: formData.get('history')
         };
 
         if (appState.editingPatientId) {
             const { error } = await _supabase.from('patients').update(patientData).eq('id', appState.editingPatientId);
-            if (error) { showToast("Erreur de mise à jour"); return; }
+            if (error) { console.error(error); showToast("Erreur de mise à jour"); return; }
             
-            // Update local state
+            // Update local state (keep camelCase for UI if needed, or update everything)
             const pIndex = appState.patients.findIndex(p => p.id === appState.editingPatientId);
-            if (pIndex !== -1) appState.patients[pIndex] = { ...appState.patients[pIndex], ...patientData };
+            if (pIndex !== -1) {
+                appState.patients[pIndex] = { 
+                    ...appState.patients[pIndex], 
+                    firstName: patientData.first_name,
+                    lastName: patientData.last_name,
+                    bloodType: patientData.blood_type,
+                    ...patientData 
+                };
+            }
             
             showToast("Dossier patient mis à jour");
             openPatient(appState.editingPatientId);
@@ -485,9 +498,14 @@ function setupEventListeners() {
             };
 
             const { error } = await _supabase.from('patients').insert([newPatient]);
-            if (error) { showToast("Erreur de création"); return; }
+            if (error) { console.error(error); showToast("Erreur de création"); return; }
             
-            appState.patients.push(newPatient);
+            appState.patients.push({
+                ...newPatient,
+                firstName: newPatient.first_name,
+                lastName: newPatient.last_name,
+                bloodType: newPatient.blood_type
+            });
             showToast("Dossier patient créé avec succès");
         }
         
@@ -684,6 +702,15 @@ ${obs ? `**Observations :**\n${obs}` : ''}
     });
 
     // PPA
+    document.getElementById('btn-new-ppa').addEventListener('click', () => {
+        document.getElementById('form-ppa').reset();
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.getElementById('ppa-date').value = now.toISOString().slice(0,16);
+        document.getElementById('ppa-evaluator').value = appState.currentDoctorName;
+        document.getElementById('modal-add-ppa').classList.add('active');
+    });
+
     document.getElementById('form-ppa').addEventListener('submit', async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
