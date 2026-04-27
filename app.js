@@ -679,16 +679,29 @@ ${obs ? `**Observations :**\n${obs}` : ''}
     document.getElementById('form-recrutement').addEventListener('submit', async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
+        
+        const q1 = formData.get('r_q1');
+        const q2 = formData.get('r_q2');
+        const q3 = formData.get('r_q3');
+        const q4 = formData.get('r_q4');
+
+        let score = 0;
+        if (q1 === '30/2') score++;
+        if (q2 === 'Garrot / Compression') score++;
+        if (q3 === 'ECG immédiat') score++;
+        if (q4 === 'Maintien cervical + ABC') score++;
+
+        let decision = 'Refusé';
+        if (score === 4) decision = 'Accepté';
+        else if (score === 3) decision = 'En attente';
+
         const newRecrutement = {
             id: generateId(),
             name: formData.get('candidate_name'),
             evaluator: formData.get('evaluator'),
             date: formData.get('date'),
-            q1: formData.get('r_q1'),
-            q2: formData.get('r_q2'),
-            q3: formData.get('r_q3'),
-            q4: formData.get('r_q4'),
-            decision: formData.get('r_decision'),
+            q1, q2, q3, q4,
+            decision: decision,
             notes: formData.get('notes')
         };
 
@@ -698,7 +711,7 @@ ${obs ? `**Observations :**\n${obs}` : ''}
         appState.recrutements.push(newRecrutement);
         document.getElementById('modal-add-recrutement').classList.remove('active');
         renderRecrutements();
-        showToast("Évaluation de recrutement enregistrée");
+        showToast(`Évaluation terminée : ${decision} (${score}/4)`);
     });
 
     // PPA
