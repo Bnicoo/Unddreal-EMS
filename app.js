@@ -713,29 +713,44 @@ ${obs ? `**Observations :**\n${obs}` : ''}
             e.preventDefault();
             const formData = new FormData(e.target);
             
-            const q1 = formData.get('r_q1');
-            const q2 = formData.get('r_q2');
-            const q3 = formData.get('r_q3');
-            const q4 = formData.get('r_q4');
+            const answers = {
+                q1: formData.get('r_q1'),
+                q2: formData.get('r_q2'),
+                q3: formData.get('r_q3'),
+                q4: formData.get('r_q4'),
+                q5: formData.get('r_q5'),
+                q6: formData.get('r_q6'),
+                q7: formData.get('r_q7'),
+                q8: formData.get('r_q8'),
+                q9: formData.get('r_q9'),
+                q10: formData.get('r_q10')
+            };
 
             let score = 0;
-            if (q1 === '30/2') score++;
-            if (q2 === 'Garrot / Compression') score++;
-            if (q3 === 'ECG immédiat') score++;
-            if (q4 === 'Maintien cervical + ABC') score++;
+            if (answers.q1 === 'Compression/Garrot') score++;
+            if (answers.q2 === 'Rassurer et expliquer') score++;
+            if (answers.q3 === 'Rectifier discrètement') score++;
+            if (answers.q4 === 'Oxygénation / ACR') score++;
+            if (answers.q5 === 'Load and Go (Bloc)') score++;
+            if (answers.q6 === 'Expliquer la sécurité') score++;
+            if (answers.q7 === 'Triage (Gravité)') score++;
+            if (answers.q8 === 'Suivre le Triage') score++;
+            if (answers.q9 === 'Urgence et sécurité') score++;
+            if (answers.q10 === 'Convaincre / Respect') score++;
 
             let decision = 'Refusé';
-            if (score === 4) decision = 'Accepté';
-            else if (score === 3) decision = 'En attente';
+            if (score >= 8) decision = 'Accepté';
+            else if (score >= 6) decision = 'En attente';
 
             const newRecrutement = {
                 id: generateId(),
                 name: formData.get('candidate_name'),
                 evaluator: formData.get('evaluator'),
                 date: formData.get('date'),
-                q1, q2, q3, q4,
+                ...answers,
                 decision: decision,
-                notes: formData.get('notes')
+                notes: formData.get('notes'),
+                score: score
             };
 
             const { error } = await _supabase.from('recrutements').insert([newRecrutement]);
@@ -744,7 +759,7 @@ ${obs ? `**Observations :**\n${obs}` : ''}
             appState.recrutements.push(newRecrutement);
             document.getElementById('modal-add-recrutement').classList.remove('active');
             renderRecrutements();
-            showToast(`Évaluation terminée : ${decision} (${score}/4)`);
+            showToast(`Évaluation terminée : ${decision} (${score}/10)`);
         });
 
         // PPA
@@ -940,13 +955,19 @@ ${obs ? `**Observations :**\n${obs}` : ''}
                     </div>
                 </div>
                 <div class="badges" style="margin-bottom: 12px;">
-                    <span class="badge ${statusBadge}" style="background-color: ${statusBadge === '' ? statusColor : 'transparent'}; color: ${statusBadge === '' ? 'white' : statusColor}; border-color: ${statusColor}">${rec.decision}</span>
+                    <span class="badge ${statusBadge}" style="background-color: ${statusBadge === '' ? statusColor : 'transparent'}; color: ${statusBadge === '' ? 'white' : statusColor}; border-color: ${statusColor}">${rec.decision} (${rec.score !== undefined ? rec.score : '?'}/10)</span>
                 </div>
-                <div style="font-size: 0.85em; opacity: 0.8; margin-top: 10px; background: rgba(0,0,0,0.02); padding: 8px; border-radius: 8px;">
-                    <strong>RCP:</strong> ${rec.q1}<br>
-                    <strong>Hémorragie:</strong> ${rec.q2}<br>
-                    <strong>Infarctus:</strong> ${rec.q3}<br>
-                    <strong>Chute:</strong> ${rec.q4}
+                <div style="font-size: 0.85em; opacity: 0.8; margin-top: 10px; background: rgba(0,0,0,0.02); padding: 8px; border-radius: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+                    <div><strong>Q1:</strong> ${rec.q1 || '-'}</div>
+                    <div><strong>Q2:</strong> ${rec.q2 || '-'}</div>
+                    <div><strong>Q3:</strong> ${rec.q3 || '-'}</div>
+                    <div><strong>Q4:</strong> ${rec.q4 || '-'}</div>
+                    <div><strong>Q5:</strong> ${rec.q5 || '-'}</div>
+                    <div><strong>Q6:</strong> ${rec.q6 || '-'}</div>
+                    <div><strong>Q7:</strong> ${rec.q7 || '-'}</div>
+                    <div><strong>Q8:</strong> ${rec.q8 || '-'}</div>
+                    <div><strong>Q9:</strong> ${rec.q9 || '-'}</div>
+                    <div><strong>Q10:</strong> ${rec.q10 || '-'}</div>
                 </div>
                 ${rec.notes ? `<p style="font-size: 0.85em; margin-top: 8px; font-style: italic;">"${rec.notes}"</p>` : ''}
                 ${managerActions}

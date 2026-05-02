@@ -820,54 +820,95 @@
                     <input type="text" name="candidate_name" required>
                 </div>
 
-                <h4 style="margin: 20px 0 10px; color: var(--primary);">Questions Théoriques</h4>
+                <h4 style="margin: 20px 0 10px; color: var(--primary);">Évaluation Théorique & Mises en Situation</h4>
+                
                 <div class="input-group">
-                    <label>1. Ratio de compressions/ventilations lors d'une RCP adulte ?</label>
+                    <label>1. Accident avec 2 blessés : un inconscient qui respire, un conscient qui saigne beaucoup. Priorité ?</label>
                     <div class="qcm-group">
-                        <label class="qcm-option"><input type="radio" name="r_q1" value="15/2"
-                                required><span>15/2</span></label>
-                        <label class="qcm-option"><input type="radio" name="r_q1" value="30/2"
-                                required><span>30/2</span></label>
-                        <label class="qcm-option"><input type="radio" name="r_q1" value="50/5"
-                                required><span>50/5</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_q1" value="PLS Inconscient" required><span>PLS Inconscient</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_q1" value="Compression/Garrot" required><span>Compression/Garrot</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_q1" value="Attendre renforts" required><span>Attendre renforts</span></label>
                     </div>
                 </div>
 
                 <div class="input-group">
-                    <label>2. Que faire face à une plaie artérielle massive à une jambe ?</label>
+                    <label>2. Un patient panique et crie pendant les soins. Réaction ?</label>
                     <div class="qcm-group">
-                        <label class="qcm-option"><input type="radio" name="r_q2" value="Pansement simple"
-                                required><span>Pansement simple</span></label>
-                        <label class="qcm-option"><input type="radio" name="r_q2" value="Garrot / Compression"
-                                required><span>Garrot / Compression</span></label>
-                        <label class="qcm-option"><input type="radio" name="r_q2" value="Attendre un supérieur"
-                                required><span>Attendre</span></label>
-                    </div>
-                </div>
-
-                <h4 style="margin: 20px 0 10px; color: var(--primary);">Mises en Situation Pratiques</h4>
-                <div class="input-group">
-                    <label>3. Situation : Un homme se plaint d'une forte douleur au thorax irradiant dans le bras
-                        gauche. Action immédiate ?</label>
-                    <div class="qcm-group">
-                        <label class="qcm-option"><input type="radio" name="r_q3" value="ECG immédiat"
-                                required><span>ECG immédiat</span></label>
-                        <label class="qcm-option"><input type="radio" name="r_q3" value="Antidouleur"
-                                required><span>Antidouleur</span></label>
-                        <label class="qcm-option"><input type="radio" name="r_q3" value="Renvoyer chez lui"
-                                required><span>Renvoyer chez lui</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_q2" value="Lui dire de se taire" required><span>Lui dire de se taire</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_q2" value="Rassurer et expliquer" required><span>Rassurer et expliquer</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_q2" value="Sédatif immédiat" required><span>Sédatif immédiat</span></label>
                     </div>
                 </div>
 
                 <div class="input-group">
-                    <label>4. Situation : Chute de 3 mètres, patient inconscient. Votre priorité ?</label>
+                    <label>3. Votre collègue fait une erreur en intervention. Que faites-vous ?</label>
                     <div class="qcm-group">
-                        <label class="qcm-option"><input type="radio" name="r_q4" value="Réveiller le patient"
-                                required><span>Réveiller le patient</span></label>
-                        <label class="qcm-option"><input type="radio" name="r_q4" value="Maintien cervical + ABC"
-                                required><span>Maintien cervical + ABC</span></label>
-                        <label class="qcm-option"><input type="radio" name="r_q4" value="Le relever" required><span>Le
-                                relever</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_q3" value="Le réprimander" required><span>Le réprimander</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_q3" value="Rectifier discrètement" required><span>Rectifier discrètement</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_q3" value="Ne rien dire" required><span>Ne rien dire</span></label>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>4. À quoi sert un massage cardiaque et quand le pratiquer ?</label>
+                    <div class="qcm-group">
+                        <label class="qcm-option"><input type="radio" name="r_q4" value="Relancer le coeur" required><span>Relancer le coeur</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_q4" value="Oxygénation / ACR" required><span>Oxygénation / ACR</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_q4" value="Calmer l'angoisse" required><span>Calmer l'angoisse</span></label>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>5. Seul en intervention : transport rapide ou stabilisation sur place ?</label>
+                    <div class="qcm-group">
+                        <label class="qcm-option"><input type="radio" name="r_q5" value="Stay and Play" required><span>Stay and Play</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_q5" value="Load and Go (Bloc)" required><span>Load and Go (Bloc)</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_q5" value="Demander au patient" required><span>Demander au patient</span></label>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>6. Annoncer une hospitalisation sans brusquer le patient ?</label>
+                    <div class="qcm-group">
+                        <label class="qcm-option"><input type="radio" name="r_q6" value="L'imposer (Grave)" required><span>L'imposer (Grave)</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_q6" value="Expliquer la sécurité" required><span>Expliquer la sécurité</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_q6" value="Minimiser (Radio)" required><span>Minimiser (Radio)</span></label>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>7. Plusieurs appels simultanés. Gestion des priorités ?</label>
+                    <div class="qcm-group">
+                        <label class="qcm-option"><input type="radio" name="r_q7" value="Premier arrivé" required><span>Premier arrivé</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_q7" value="Triage (Gravité)" required><span>Triage (Gravité)</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_q7" value="Plus proche" required><span>Plus proche</span></label>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>8. Un ami blessé demande d'être prioritaire. Action ?</label>
+                    <div class="qcm-group">
+                        <label class="qcm-option"><input type="radio" name="r_q8" value="Le soigner d'abord" required><span>Le soigner d'abord</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_q8" value="Suivre le Triage" required><span>Suivre le Triage</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_q8" value="Déléguer en priorité" required><span>Déléguer en priorité</span></label>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>9. Rôle principal d'un EMS en ville ?</label>
+                    <div class="qcm-group">
+                        <label class="qcm-option"><input type="radio" name="r_q9" value="Conduite et sirènes" required><span>Conduite et sirènes</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_q9" value="Urgence et sécurité" required><span>Urgence et sécurité</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_q9" value="Appui Police" required><span>Appui Police</span></label>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>10. Patient en danger refuse les soins. Gestion ?</label>
+                    <div class="qcm-group">
+                        <label class="qcm-option"><input type="radio" name="r_q10" value="Force physique" required><span>Force physique</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_q10" value="Convaincre / Respect" required><span>Convaincre / Respect</span></label>
+                        <label class="qcm-option"><input type="radio" name="r_q10" value="Partir de suite" required><span>Partir de suite</span></label>
                     </div>
                 </div>
 
