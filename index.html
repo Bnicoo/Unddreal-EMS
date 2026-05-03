@@ -30,6 +30,7 @@
                 <button class="nav-btn active" id="nav-patients">Dossiers Patients</button>
                 <button class="nav-btn" id="nav-recrutement">Recrutements</button>
                 <button class="nav-btn" id="nav-ppa">Tests PPA</button>
+                <button class="nav-btn" id="nav-certificats">Certificats</button>
                 <button class="nav-btn" id="nav-reglement">Règlement EMS</button>
             </div>
             <div class="user-profile">
@@ -416,6 +417,83 @@
                         </p>
                     </div>
 
+                </div>
+            </div>
+        </section>
+
+        <!-- View: Certificats -->
+        <section id="view-certificats" class="view hidden">
+            <div class="container">
+                <div class="page-header">
+                    <div>
+                        <h2>Certificats Médicaux</h2>
+                        <p class="subtitle">Génération automatique de certificats d'arrêt maladie au format PDF.</p>
+                    </div>
+                </div>
+
+                <div class="glass-panel" style="max-width: 600px; margin: 0 auto; padding: 30px;">
+                    <form id="form-certificat">
+                        <div class="form-row">
+                            <div class="input-group">
+                                <label>Prénom du Patient</label>
+                                <input type="text" id="cert-prenom" required>
+                            </div>
+                            <div class="input-group">
+                                <label>Nom du Patient</label>
+                                <input type="text" id="cert-nom" required>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Raison de l'arrêt</label>
+                            <input type="text" id="cert-raison" placeholder="Ex: Grippe sévère, Entorse, Surmenage..." required>
+                        </div>
+                        <div class="input-group">
+                            <label>Durée de l'arrêt maladie (en jours)</label>
+                            <input type="number" id="cert-duree" min="1" required>
+                        </div>
+                        <div style="margin-top: 25px;">
+                            <button type="submit" class="btn-primary" style="width: 100%;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                                Générer et Télécharger le PDF
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Hidden template for the PDF content -->
+                <div style="position: absolute; left: -9999px; top: -9999px;">
+                    <div id="certificat-pdf-template" style="padding: 40px; background: white; color: black; font-family: 'Outfit', sans-serif; width: 800px; box-sizing: border-box;">
+                        <div style="text-align: center; margin-bottom: 40px; border-bottom: 2px solid #333; padding-bottom: 20px;">
+                            <h1 style="color: #333; margin: 0;">UNDDREAL EMS</h1>
+                            <p style="color: #666; margin: 5px 0 0 0;">Service Médical d'Urgence - Los Santos</p>
+                        </div>
+                        
+                        <h2 style="text-align: center; color: #222; text-transform: uppercase; margin-bottom: 40px; font-size: 24px; letter-spacing: 1px;">Certificat Médical d'Arrêt de Travail</h2>
+                        
+                        <div style="font-size: 16px; line-height: 1.8; margin-bottom: 40px;">
+                            <p>Je soussigné(e), <strong id="pdf-doctor-name">[Nom du Médecin]</strong>, certifie avoir examiné ce jour :</p>
+                            <p style="margin-top: 20px; font-size: 18px; text-align: center;"><strong>M./Mme <span id="pdf-patient-name">[Nom du Patient]</span></strong></p>
+                            <p style="margin-top: 20px;">Et constate que son état de santé nécessite un arrêt de travail pour la raison suivante :</p>
+                            <div style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-left: 4px solid #333;">
+                                <strong id="pdf-reason">[Raison]</strong>
+                            </div>
+                            <p>Cet arrêt est prescrit pour une durée de <strong><span id="pdf-duration">[X]</span> jours</strong>, à compter de ce jour : <strong id="pdf-date">[Date]</strong>.</p>
+                        </div>
+                        
+                        <div style="margin-top: 60px; display: flex; justify-content: space-between;">
+                            <div>
+                                <p style="margin: 0; color: #666;">Fait pour valoir ce que de droit.</p>
+                            </div>
+                            <div style="text-align: center;">
+                                <p style="margin: 0;"><strong>Signature / Cachet</strong></p>
+                                <p style="margin-top: 5px; color: #666; font-style: italic;">Validé électroniquement par<br><span id="pdf-doctor-signature">[Nom du Médecin]</span></p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -1074,6 +1152,7 @@
 
     <div id="print-container" class="print-only"></div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="app.js?v=supabase"></script>
 </body>

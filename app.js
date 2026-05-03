@@ -405,6 +405,7 @@
             document.getElementById('nav-recrutement').classList.remove('active');
             document.getElementById('nav-ppa').classList.remove('active');
             document.getElementById('nav-reglement').classList.remove('active');
+            document.getElementById('nav-certificats').classList.remove('active');
             switchView('view-dashboard');
             renderPatients(document.getElementById('search-patient').value);
         });
@@ -414,6 +415,7 @@
             document.getElementById('nav-patients').classList.remove('active');
             document.getElementById('nav-ppa').classList.remove('active');
             document.getElementById('nav-reglement').classList.remove('active');
+            document.getElementById('nav-certificats').classList.remove('active');
             switchView('view-recrutement');
             renderRecrutements();
         });
@@ -423,8 +425,18 @@
             document.getElementById('nav-patients').classList.remove('active');
             document.getElementById('nav-recrutement').classList.remove('active');
             document.getElementById('nav-reglement').classList.remove('active');
+            document.getElementById('nav-certificats').classList.remove('active');
             switchView('view-ppa');
             renderPpa();
+        });
+
+        document.getElementById('nav-certificats').addEventListener('click', () => {
+            document.getElementById('nav-certificats').classList.add('active');
+            document.getElementById('nav-patients').classList.remove('active');
+            document.getElementById('nav-recrutement').classList.remove('active');
+            document.getElementById('nav-ppa').classList.remove('active');
+            document.getElementById('nav-reglement').classList.remove('active');
+            switchView('view-certificats');
         });
 
         document.getElementById('nav-reglement').addEventListener('click', () => {
@@ -432,7 +444,43 @@
             document.getElementById('nav-patients').classList.remove('active');
             document.getElementById('nav-recrutement').classList.remove('active');
             document.getElementById('nav-ppa').classList.remove('active');
+            document.getElementById('nav-certificats').classList.remove('active');
             switchView('view-reglement');
+        });
+
+        // Form Certificat
+        document.getElementById('form-certificat').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const prenom = document.getElementById('cert-prenom').value;
+            const nom = document.getElementById('cert-nom').value;
+            const raison = document.getElementById('cert-raison').value;
+            const duree = document.getElementById('cert-duree').value;
+            const doctorName = appState.currentDoctorName || "Dr. Inconnu";
+            
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+
+            document.getElementById('pdf-doctor-name').textContent = doctorName;
+            document.getElementById('pdf-patient-name').textContent = `${prenom} ${nom}`;
+            document.getElementById('pdf-reason').textContent = raison;
+            document.getElementById('pdf-duration').textContent = duree;
+            document.getElementById('pdf-date').textContent = dateStr;
+            document.getElementById('pdf-doctor-signature').textContent = doctorName;
+
+            const element = document.getElementById('certificat-pdf-template');
+            
+            const opt = {
+                margin:       10,
+                filename:     `Certificat_Medical_${nom}_${prenom}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                showToast("Certificat généré et téléchargé en PDF");
+                document.getElementById('form-certificat').reset();
+            });
         });
 
         // Back button
